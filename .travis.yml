@@ -1,0 +1,117 @@
+env:
+  global:
+    # directory containing the project source
+    - REPO_DIR=brotli
+    # Commit from your-project that you want to build
+    - BUILD_COMMIT=v0.6.0
+    # pip dependencies to _build_ project
+    - BUILD_DEPENDS=
+    # pip dependencies to _test_ project
+    - TEST_DEPENDS=
+    - PLAT=x86_64
+    - UNICODE_WIDTH=32
+
+language: python
+# The travis Python version is unrelated to the version we build and test
+# with.  This is set with the MB_PYTHON_VERSION variable.
+python: 3.6
+sudo: required
+dist: trusty
+services: docker
+
+matrix:
+  exclude:
+    # Exclude the default Python 3.6 build
+    - python: 3.6
+  include:
+    - os: linux
+      env: MB_PYTHON_VERSION=2.7
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=2.7
+        - UNICODE_WIDTH=16
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=2.7
+        - PLAT=i686
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=2.7
+        - PLAT=i686
+        - UNICODE_WIDTH=16
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.4
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.4
+        - PLAT=i686
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.5
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.5
+        - PLAT=i686
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.6
+        - BUILD_SDIST=true
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.6
+        - PLAT=i686
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=2.7
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.4
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.5
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.6
+
+before_install:
+  - source multibuild/common_utils.sh
+  - source multibuild/travis_steps.sh
+  - before_install
+
+install:
+  - clean_code $REPO_DIR $BUILD_COMMIT
+  - build_wheel $REPO_DIR $PLAT
+
+script:
+  - install_run $PLAT
+
+after_success:
+  # if tagged, create the source distribution for the deploy stage,
+  # and copy compiled wheel to dist/ where Travis `dpl` expects it
+  - >
+    if [ -n "$TRAVIS_TAG" ]; then
+      distdir=${TRAVIS_BUILD_DIR}/dist;
+      mkdir -p $distdir;
+      if [ "$BUILD_SDIST" == true ]; then
+        pip install -U setuptools;
+        (cd $REPO_DIR && python setup.py sdist --dist-dir $distdir --formats=zip);
+      fi;
+      cp ${TRAVIS_BUILD_DIR}/wheelhouse/*.whl $distdir
+    fi
+
+deploy:
+  # deploy on tags to Github Releases
+  - provider: releases
+    api_key:
+      secure: MZePYuq+V4+LqU6qVXDCyau+8nNDYhT+DENXUFjF/B5t83ShunSekUdPrDzHzwr7XsxQdaROS0BuZ21W42ZKB4mlSBAN00DPKsuXHh2TSlFTOlIeSWYglw3+1pb+/Avjm/kRG18LMd8moNb9WKyK2gWu2EHsM/1c+ZOQVBhnRC9KpCadgDBWxggw5VhjE2Js6wZLj0Rxn1vBCtL0iFZMwm58596NIckjkO96H4Isv5WJTgPIvFGk6BUhH1pR8R/ZACjjqyqTNuZvbOCEFqRsjjbNzZJlu57zcp1zna6Q4mWr01V3MSL7d/rlaE+vqm42Rko4/C/I9ooKaEr+ycc24sLiL8u0zIPtc6LRArVGo+avZhsjPz/JBZJsI1k+p+WjWb2RXWHgxTqUfdRbJ/HJrpTLz06xmEiCa6QOTfO0xvNqo+CqlDmrEpDeTrvH4q3ADSEm20M7phzoBjED0NTITBybwV8zI5jRgVKJbIcqrrzjq/tOD4Gy22SzxZLzsuVs8+n3iwnriUVKusMmfXXP8GxhzQNKMVyNILdWo4H7rheVDVa/LXylJAgrLIyKc4aNaDiZdd3zgMvN3p/JOsIuxW8f+6ILHIq+02kxWjM9aJ24ZPeTQCgjkhOzTssjH6s2gzk9yumlsX9C7H1i1RtBWX1qfr8sgcI+zshqPER+DLQ=
+    file_glob: true
+    file: "dist/*"
+    skip_cleanup: true
+    on:
+      repo: anthrotype/brotli-wheels
+      tags: true

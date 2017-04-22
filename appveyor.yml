@@ -1,0 +1,97 @@
+environment:
+  global:
+    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
+    # /E:ON and /V:ON options are not enabled in the batch script intepreter
+    # See: http://stackoverflow.com/a/13751649/163740
+    CMD_IN_ENV: "cmd /E:ON /V:ON /C %APPVEYOR_BUILD_FOLDER%\\multibuild\\ci\\appveyor\\windows_sdk.cmd"
+    REPO_DIR: brotli
+    BUILD_COMMIT: v0.6.0
+
+  matrix:
+
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python27-x64"
+      PYTHON_VERSION: "2.7.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python34"
+      PYTHON_VERSION: "3.4.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python34-x64"
+      PYTHON_VERSION: "3.4.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python35-x64"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python36-x64"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "64"
+
+matrix:
+  fast_finish: true
+
+install:
+  # Fetch submodules
+  - "git submodule update --init --recursive"
+
+  # Prepend Python to the PATH of this build
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+
+  # Check that we have the expected version and architecture for Python
+  - "python --version"
+  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+
+  # Upgrade to the latest version of pip to avoid it displaying warnings
+  # about it being out of date.
+  - "python -m pip install --disable-pip-version-check --user --upgrade pip"
+
+  # Upgrade setuptools, wheel and virtualenv
+  - "python -m pip install --upgrade setuptools wheel virtualenv"
+
+  # Create new virtual environment and activate it
+  - "python -m virtualenv venv"
+  - "venv\\Scripts\\activate"
+  - "python -c \"import sys; print(sys.executable)\""
+
+build_script:
+  # checkout repo at build commit
+  - "cd %REPO_DIR%"
+  - "git fetch origin"
+  - "git checkout %BUILD_COMMIT%"
+  - "git submodule update --init --recursive"
+  # build wheel
+  - "%CMD_IN_ENV% pip wheel -v -w ..\\wheelhouse --no-deps ."
+
+test_script:
+  # install from wheel
+  - "pip install --no-index --find-links ..\\wheelhouse brotli"
+  # run tests against installed package
+  - "python -m unittest discover -v -s python -p \"*_test.py\""
+
+artifacts:
+  # Archive the generated wheel package in the ci.appveyor.com build report.
+  - path: wheelhouse\*.whl
+
+deploy:
+  # Deploy wheels on tags to GitHub Releases
+  - provider: GitHub
+    auth_token:
+      secure: IbLEKs2PEnl9flhu8Xy3Ee5TtdFiYoOeWYg3VaSuB9H3A9kmjTYKoMbRE+8LadvF
+    draft: false
+    prerelease: false
+    on:
+      appveyor_repo_tag: true
