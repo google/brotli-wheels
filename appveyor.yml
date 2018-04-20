@@ -1,9 +1,5 @@
 environment:
   global:
-    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
-    # /E:ON and /V:ON options are not enabled in the batch script intepreter
-    # See: http://stackoverflow.com/a/13751649/163740
-    CMD_IN_ENV: "cmd /E:ON /V:ON /C %APPVEYOR_BUILD_FOLDER%\\multibuild\\ci\\appveyor\\windows_sdk.cmd"
     REPO_DIR: brotli
     BUILD_COMMIT: v1.0.4
 
@@ -74,7 +70,7 @@ build_script:
   - "git checkout %BUILD_COMMIT%"
   - "git submodule update --init --recursive"
   # build wheel
-  - "%CMD_IN_ENV% pip wheel -v -w ..\\wheelhouse --no-deps ."
+  - "pip wheel -v -w ..\\wheelhouse --no-deps ."
 
 test_script:
   # install from wheel
