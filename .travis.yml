@@ -108,10 +108,10 @@ deploy:
   # deploy on tags to Github Releases
   - provider: releases
     api_key:
-      secure: MZePYuq+V4+LqU6qVXDCyau+8nNDYhT+DENXUFjF/B5t83ShunSekUdPrDzHzwr7XsxQdaROS0BuZ21W42ZKB4mlSBAN00DPKsuXHh2TSlFTOlIeSWYglw3+1pb+/Avjm/kRG18LMd8moNb9WKyK2gWu2EHsM/1c+ZOQVBhnRC9KpCadgDBWxggw5VhjE2Js6wZLj0Rxn1vBCtL0iFZMwm58596NIckjkO96H4Isv5WJTgPIvFGk6BUhH1pR8R/ZACjjqyqTNuZvbOCEFqRsjjbNzZJlu57zcp1zna6Q4mWr01V3MSL7d/rlaE+vqm42Rko4/C/I9ooKaEr+ycc24sLiL8u0zIPtc6LRArVGo+avZhsjPz/JBZJsI1k+p+WjWb2RXWHgxTqUfdRbJ/HJrpTLz06xmEiCa6QOTfO0xvNqo+CqlDmrEpDeTrvH4q3ADSEm20M7phzoBjED0NTITBybwV8zI5jRgVKJbIcqrrzjq/tOD4Gy22SzxZLzsuVs8+n3iwnriUVKusMmfXXP8GxhzQNKMVyNILdWo4H7rheVDVa/LXylJAgrLIyKc4aNaDiZdd3zgMvN3p/JOsIuxW8f+6ILHIq+02kxWjM9aJ24ZPeTQCgjkhOzTssjH6s2gzk9yumlsX9C7H1i1RtBWX1qfr8sgcI+zshqPER+DLQ=
+      secure: nD+188iPAfLilKYtGhIdvDJzOq0j9omBzVcHsXQSxK6+OkUmvi1up8tww7gkA3ilym4BPgdT9Ovsh1VcpKj33IeU8Oh3UKrl/TJFL4geaUh9+bQv9Vucv8FPY+S5gV4mJaVJvFU8ulriYtmLjFRBNJmuM8xcu9VNGThI86iWJotRlYhMGXbrmDOWnOLixQ/61mlgilfeXTu3OE1B2luMXnCLpP1Lz7GhFBfsBu2LgpZBETZZ8rTcqDaSRxUKY17WAN36pQOHhWTxOwqfzFlBW4IUUgOC7Rpkrx7jMiVbKvtDyxw6UHJE0q0hVQsd8Wa1LacOfQiiZF5p2ES9sNfo+Y5TzhdIZ303udXiFyEruzTONC+TFeIEuaWE5+jDC7vwEmpdZ8+elb1I+cOoOtSmepObyrLw+fAlxKyibTN0HD6BdCrqTUQySRjJbjvSzJfdhE1cuBbV0napQWSx5ZfSyg3zIPwynKn+y9ujUt0szc4Ke/mEdrvLBn+bbgsmrXWfo91eyJFsVBiOcLpcH5pT2zHJg7XcWgMffN0NuDwVh0+JFbF8gJG2WKjnlHrpskW4gP9c/iq8d5NVtJW1XOEowK10IOYpgkwP7FP5rwybpMe3wBbBw6c96mmAtON0vogSe1i2LJjZh8F91DNMe7I2kikBLQahzsEAQyOi+20xJZw=
     file_glob: true
     file: "dist/*"
     skip_cleanup: true
     on:
-      repo: anthrotype/brotli-wheels
+      repo: google/brotli-wheels
       tags: true
