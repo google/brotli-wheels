@@ -10,6 +10,9 @@ env:
     - TEST_DEPENDS=
     - PLAT=x86_64
     - UNICODE_WIDTH=32
+    # PyPI credentials
+    - TWINE_USERNAME=anthrotype
+    - secure: ZNFjXfsYcCuRDgUIX1LRGRyjO4UbdhST+uizFelG+sa9rQ+bbQN+MHXXBPH2n3xLoQLYwXuOISp/+ZnDTNsJGcIVSL2fL3IgT3POx5x0FYCm+d0m1bJb95mT3NStHfWo2vw7zfNS3A+zLGuscpVacJ9e6XE02aYTNZigsT8FF/+LzmBEusTYjqGeXlTfXR68fTvqf/uNX0oK2UCSmnkyOSdRpIsJbr2RpNWFU75rW81Vi5T0IgooneqGAa57pY0Q51pfhgzon0gu6PwIc4AZN8tMyQlIPMq/hcRgz6DyPmftxts6VzbWriKNCdNU4ovM4uydRO90Xxy5xM4v24iNQUvKcze8Cq26PPlHGjLSb/uABGGVkNLfKSimX9ME3lBGTNBlipZddbLIN9m61/hHRT4KC1Bm8I6b+nF3SUCI2LAYpC8ZiR+0+FBskB3gA7EuJWpHYjify55+y+iIpf8AKphDnRlDcDxZlnlT1BDJ/8BCV0p6a1pvYHUuDHiHHdNHSgbK2RnM/ARkXXTDGCMcHJC9td5cUTopqbeuBltLEnWgr1vEr9D2jjx92+fv+QkbbtHd3WSlsh4IXt5NthS7zMVTXs1dZhMVovnbs37h6weRKPqSypZvAsKqs2wOU0KRi9A0eH/h59TlqNp0Nau+tDySyNE05crbvy8gjtK/uks=
 
 language: python
 # The travis Python version is unrelated to the version we build and test
@@ -91,27 +94,16 @@ script:
   - install_run $PLAT
 
 after_success:
-  # if tagged, create the source distribution for the deploy stage,
-  # and copy compiled wheel to dist/ where Travis `dpl` expects it
-  - >
-    if [ -n "$TRAVIS_TAG" ]; then
-      distdir=${TRAVIS_BUILD_DIR}/dist;
-      mkdir -p $distdir;
+  # if tagged, create the source distribution and upload to PyPI
+  - |
+    if [ -m "$TRAVIS_TAG" ]; then
+      cd ${TRAVIS_BUILD_DIR}
+      source venv/bin/activate
+      pip install twine
       if [ "$BUILD_SDIST" == true ]; then
-        pip install -U setuptools;
-        (cd $REPO_DIR && python setup.py sdist --dist-dir $distdir --formats=zip);
-      fi;
-      cp ${TRAVIS_BUILD_DIR}/wheelhouse/*.whl $distdir
+        pip install -U setuptools
+        (cd $REPO_DIR && python setup.py sdist --formats=zip)
+        twine upload dist/*.zip
+      fi
+      twine upload wheelhouse/*.whl
     fi
-
-deploy:
-  # deploy on tags to Github Releases
-  - provider: releases
-    api_key:
-      secure: nD+188iPAfLilKYtGhIdvDJzOq0j9omBzVcHsXQSxK6+OkUmvi1up8tww7gkA3ilym4BPgdT9Ovsh1VcpKj33IeU8Oh3UKrl/TJFL4geaUh9+bQv9Vucv8FPY+S5gV4mJaVJvFU8ulriYtmLjFRBNJmuM8xcu9VNGThI86iWJotRlYhMGXbrmDOWnOLixQ/61mlgilfeXTu3OE1B2luMXnCLpP1Lz7GhFBfsBu2LgpZBETZZ8rTcqDaSRxUKY17WAN36pQOHhWTxOwqfzFlBW4IUUgOC7Rpkrx7jMiVbKvtDyxw6UHJE0q0hVQsd8Wa1LacOfQiiZF5p2ES9sNfo+Y5TzhdIZ303udXiFyEruzTONC+TFeIEuaWE5+jDC7vwEmpdZ8+elb1I+cOoOtSmepObyrLw+fAlxKyibTN0HD6BdCrqTUQySRjJbjvSzJfdhE1cuBbV0napQWSx5ZfSyg3zIPwynKn+y9ujUt0szc4Ke/mEdrvLBn+bbgsmrXWfo91eyJFsVBiOcLpcH5pT2zHJg7XcWgMffN0NuDwVh0+JFbF8gJG2WKjnlHrpskW4gP9c/iq8d5NVtJW1XOEowK10IOYpgkwP7FP5rwybpMe3wBbBw6c96mmAtON0vogSe1i2LJjZh8F91DNMe7I2kikBLQahzsEAQyOi+20xJZw=
-    file_glob: true
-    file: "dist/*"
-    skip_cleanup: true
-    on:
-      repo: google/brotli-wheels
-      tags: true
