@@ -114,7 +114,7 @@ after_success:
       if [ "$BUILD_SDIST" == true ]; then
         pip install -U setuptools
         (cd $REPO_DIR && python setup.py sdist --formats=zip)
-        twine upload dist/*.zip
+        twine upload $REPO_DIR/dist/*.zip
       fi
       twine upload wheelhouse/*.whl
     fi
