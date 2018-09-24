@@ -99,7 +99,8 @@ deploy_script:
       if($env:APPVEYOR_REPO_TAG -eq 'true') {
         Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
         pip install --upgrade twine
-        twine upload wheelhouse\*.whl
+        cd wheelhouse
+        twine upload *.whl
       } else {
         Write-Output "Not deploying as this is not a tagged commit"
       }
