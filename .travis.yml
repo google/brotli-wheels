@@ -107,7 +107,7 @@ script:
 after_success:
   # if tagged, create the source distribution and upload to PyPI
   - |
-    if [ -m "$TRAVIS_TAG" ]; then
+    if [ -n "$TRAVIS_TAG" ]; then
       cd ${TRAVIS_BUILD_DIR}
       source venv/bin/activate
       pip install twine
