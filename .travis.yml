@@ -3,7 +3,7 @@ env:
     # directory containing the project source
     - REPO_DIR=brotli
     # Commit from your-project that you want to build
-    - BUILD_COMMIT=v1.0.4
+    - BUILD_COMMIT=v1.0.6
     # pip dependencies to _build_ project
     - BUILD_DEPENDS=
     # pip dependencies to _test_ project
@@ -64,6 +64,13 @@ matrix:
       env:
         - MB_PYTHON_VERSION=3.6
         - PLAT=i686
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.7
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.7
+        - PLAT=i686
     - os: osx
       language: generic
       env:
@@ -80,6 +87,10 @@ matrix:
       language: generic
       env:
         - MB_PYTHON_VERSION=3.6
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.7
 
 before_install:
   - source multibuild/common_utils.sh
