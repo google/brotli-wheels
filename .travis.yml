@@ -1,7 +1,7 @@
 env:
   global:
     # directory containing the project source
-    - REPO_DIR=brotli
+    - REPO_DIR=src/brotli
     # Commit from your-project that you want to build
     - BUILD_COMMIT=v1.0.7
     # pip dependencies to _build_ project

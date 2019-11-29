@@ -2,5 +2,5 @@
 	path = multibuild
 	url = https://github.com/matthew-brett/multibuild
 [submodule "brotli"]
-	path = brotli
+	path = src/brotli
 	url = https://github.com/google/brotli
