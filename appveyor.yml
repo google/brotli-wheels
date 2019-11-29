@@ -96,7 +96,7 @@ test_script:
   # install from wheel
   - "pip install --no-index --find-links wheelhouse brotli"
   # run tests against installed package
-  - "python -m unittest discover -v -s python -p \"*_test.py\""
+  - "python -m unittest discover -v -s %REPO_DIR%\\python -p \"*_test.py\""
 
 artifacts:
   # Archive the generated wheel package in the ci.appveyor.com build report.
