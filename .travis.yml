@@ -102,10 +102,10 @@ script:
 after_success:
   # if tagged, create the source distribution and upload to PyPI
   - |
-    if [ -n "$TRAVIS_TAG" ]; then
+    if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_REPO_SLUG" == "google/brotli-wheels" ]; then
       cd ${TRAVIS_BUILD_DIR}
-      source venv/bin/activate
-      pip install twine
+      pip install -U pip
+      pip install -U twine
       if [ "$BUILD_SDIST" == true ]; then
         pip install -U setuptools
         (cd $REPO_DIR && python setup.py sdist --formats=zip)
