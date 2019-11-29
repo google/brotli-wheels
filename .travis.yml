@@ -14,18 +14,11 @@ env:
     - TWINE_USERNAME=anthrotype
     - secure: Bk9RlyRm7ZajhfYm/RCd+h1bH5O0sdTU2jBv0jIhHlwiM2WuPANo0tJqNRYCV9orkFpZ80o8+Z4KIiUO1WkYrz3baE5SeRggWeE3sX3NRMOwQa/xXpfcsjMx9QgrqTasSMDTHpcBsoWgsXJJVmtx2e9AhEeYbNB6cWNkpmD8laSBiQGe1GlNo1AoqXIJqVsAfVAh3UWfvud9YtawkgWPDLXcoMaXdXiiMXvtp662Yg3rcPVTcJSovweQqQfCK+H6960WM6mXRJAsHRftYqrWmyLUdBzvhYGq5Hdv68z/C3VGI+MBJIoiQctsH/lbdKdxydLMPZCeff0+dzoufiNgxyEQk5AcAybxJLgpawzNMx2poCvrcVLqFK8u2jU3BXZMAztAxt/lTyS2fc71AMrFiunjbnReke3Gut8lsjxOugfwe4L3k+WZehmznl0Xyd8YRA8fQABwfNe3Rzz9G2+Sq4yDfalE/CWKCjCPaL7ro/g87o9qEcqGDnujpPCyOSVskNZHPn+xMoSzkwY0wmDyIXsc6ZnTj/P84VeY6OIhY+DjtjHMUjH1KaVMr9dXPiPZ7COl2myIQMEsGV3Oqbf9963RQj2zSRcr2JYu8dbpgMDH+MycgsKi10wPLdVdeXq5DM+7tVwkB8+YVKfg9ymA0K/LzTt+4V4Ga9UkPjdhRbg=
 
-language: python
-# The travis Python version is unrelated to the version we build and test
-# with.  This is set with the MB_PYTHON_VERSION variable.
-python: 3.6
-sudo: required
-dist: trusty
+language: generic
+dist: xenial
 services: docker
 
 matrix:
-  exclude:
-    # Exclude the default Python 3.6 build
-    - python: 3.6
   include:
     - os: linux
       env: MB_PYTHON_VERSION=2.7
@@ -71,26 +64,31 @@ matrix:
       env:
         - MB_PYTHON_VERSION=3.7
         - PLAT=i686
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.8
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.8
+        - PLAT=i686
     - os: osx
-      language: generic
       env:
         - MB_PYTHON_VERSION=2.7
     - os: osx
-      language: generic
       env:
         - MB_PYTHON_VERSION=3.4
     - os: osx
-      language: generic
       env:
         - MB_PYTHON_VERSION=3.5
     - os: osx
-      language: generic
       env:
         - MB_PYTHON_VERSION=3.6
     - os: osx
-      language: generic
       env:
         - MB_PYTHON_VERSION=3.7
+    - os: osx
+      env:
+        - MB_PYTHON_VERSION=3.8
 
 before_install:
   - source multibuild/common_utils.sh
