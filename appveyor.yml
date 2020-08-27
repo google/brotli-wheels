@@ -1,7 +1,7 @@
 environment:
   global:
     REPO_DIR: "src\\brotli"
-    BUILD_COMMIT: v1.0.8
+    BUILD_COMMIT: v1.0.9
     TWINE_USERNAME: "eustas"
     TWINE_PASSWORD:
       secure: wAm+yGFa25JYatQr0nJbvm5h6ZTBGVPvJSnR5eUwMuU=
@@ -10,10 +10,6 @@ environment:
 
     - PYTHON: "C:\\Python27"
       PYTHON_VERSION: "2.7.x"
-      PYTHON_ARCH: "32"
-
-    - PYTHON: "C:\\Python34"
-      PYTHON_VERSION: "3.4.x"
       PYTHON_ARCH: "32"
 
     - PYTHON: "C:\\Python35"
