@@ -37,13 +37,6 @@ matrix:
         - UNICODE_WIDTH=16
     - os: linux
       env:
-        - MB_PYTHON_VERSION=3.5
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=3.5
-        - PLAT=i686
-    - os: linux
-      env:
         - MB_PYTHON_VERSION=3.6
         - BUILD_SDIST=true
     - os: linux
@@ -64,12 +57,16 @@ matrix:
       env:
         - MB_PYTHON_VERSION=3.8
         - PLAT=i686
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.9
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.9
+        - PLAT=i686
     - os: osx
       env:
         - MB_PYTHON_VERSION=2.7
-    - os: osx
-      env:
-        - MB_PYTHON_VERSION=3.5
     - os: osx
       env:
         - MB_PYTHON_VERSION=3.6
@@ -79,6 +76,9 @@ matrix:
     - os: osx
       env:
         - MB_PYTHON_VERSION=3.8
+    - os: osx
+      env:
+        - MB_PYTHON_VERSION=3.9
 
 before_install:
   - source multibuild/common_utils.sh
