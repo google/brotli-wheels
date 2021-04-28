@@ -21,21 +21,6 @@ services: docker
 matrix:
   include:
     - os: linux
-      env: MB_PYTHON_VERSION=2.7
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=2.7
-        - UNICODE_WIDTH=16
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=2.7
-        - PLAT=i686
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=2.7
-        - PLAT=i686
-        - UNICODE_WIDTH=16
-    - os: linux
       env:
         - MB_PYTHON_VERSION=3.6
         - BUILD_SDIST=true
@@ -44,12 +29,32 @@ matrix:
         - MB_PYTHON_VERSION=3.6
         - PLAT=i686
     - os: linux
+      arch: arm64-graviton2
+      dist: focal
+      virt: vm
+      group: edge
+      env:
+        - MB_PYTHON_VERSION=3.6
+        - PLAT=aarch64
+        - DOCKER_IMAGE=quay.io/pypa/manylinux2014_${PLAT}
+        - DOCKER_TEST_IMAGE=multibuild/xenial_arm64v8
+    - os: linux
       env:
         - MB_PYTHON_VERSION=3.7
     - os: linux
       env:
         - MB_PYTHON_VERSION=3.7
         - PLAT=i686
+    - os: linux
+      arch: arm64-graviton2
+      dist: focal
+      virt: vm
+      group: edge
+      env:
+        - MB_PYTHON_VERSION=3.7
+        - PLAT=aarch64
+        - DOCKER_IMAGE=quay.io/pypa/manylinux2014_${PLAT}
+        - DOCKER_TEST_IMAGE=multibuild/xenial_arm64v8
     - os: linux
       env:
         - MB_PYTHON_VERSION=3.8
@@ -58,15 +63,32 @@ matrix:
         - MB_PYTHON_VERSION=3.8
         - PLAT=i686
     - os: linux
+      arch: arm64-graviton2
+      dist: focal
+      virt: vm
+      group: edge
+      env:
+        - MB_PYTHON_VERSION=3.8
+        - PLAT=aarch64
+        - DOCKER_IMAGE=quay.io/pypa/manylinux2014_${PLAT}
+        - DOCKER_TEST_IMAGE=multibuild/xenial_arm64v8
+    - os: linux
       env:
         - MB_PYTHON_VERSION=3.9
     - os: linux
       env:
         - MB_PYTHON_VERSION=3.9
         - PLAT=i686
-    - os: osx
+    - os: linux
+      arch: arm64-graviton2
+      dist: focal
+      virt: vm
+      group: edge
       env:
-        - MB_PYTHON_VERSION=2.7
+        - MB_PYTHON_VERSION=3.9
+        - PLAT=aarch64
+        - DOCKER_IMAGE=quay.io/pypa/manylinux2014_${PLAT}
+        - DOCKER_TEST_IMAGE=multibuild/xenial_arm64v8
     - os: osx
       env:
         - MB_PYTHON_VERSION=3.6
