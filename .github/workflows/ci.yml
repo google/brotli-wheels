@@ -39,7 +39,7 @@ jobs:
       run: twine check dist/*.tar.gz
     - uses: actions/upload-artifact@v2
       with:
-        path: dist/*.tar.gz
+        path: ${{ env.PACKAGE_DIR }}/dist/*.tar.gz
 
   build_wheels:
     name: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }}
@@ -98,7 +98,7 @@ jobs:
         path: wheelhouse/*.whl
 
   build_arch_wheels:
-    name: ${{ matrix.python }} on ${{ matrix.arch }}
+    name: py${{ matrix.python }} on ${{ matrix.arch }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
