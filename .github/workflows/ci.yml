@@ -13,7 +13,6 @@ on:
 env:
   PROJECT_NAME: brotli
   PACKAGE_DIR: src/brotli
-  OUTPUT_DIR: dist
   CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python/ -p "*_test.py"
 
 jobs:
@@ -21,6 +20,9 @@ jobs:
   build_sdist:
     name: Build Source Distribution
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PACKAGE_DIR }}
     steps:
     - uses: actions/checkout@v1
       with:
@@ -30,14 +32,14 @@ jobs:
       with:
         python-version: "3.x"
     - name: Install dependencies
-      run: pip install --upgrade setuptools wheel twine
+      run: pip install --upgrade setuptools twine
     - name: Build sdist
       run: python setup.py sdist
     - name: Check metadata
-      run: twine check ${{ env.OUTPUT_DIR }}/*.tar.gz
+      run: twine check dist/*.tar.gz
     - uses: actions/upload-artifact@v2
       with:
-        path: ${{ env.OUTPUT_DIR }}/*.tar.gz
+        path: dist/*.tar.gz
 
   build_wheels:
     name: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }}
@@ -85,7 +87,7 @@ jobs:
     - name: Install dependencies
       run: pip install cibuildwheel
     - name: Build Wheels
-      run: python -m cibuildwheel --output-dir "${OUTPUT_DIR}" "${PACKAGE_DIR}"
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
       env:
         CIBW_BUILD: ${{ matrix.build }}
         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
@@ -93,7 +95,7 @@ jobs:
         CIBW_ARCHS: ${{ matrix.arch }}
     - uses: actions/upload-artifact@v2
       with:
-        path: ${{ env.OUTPUT_DIR }}/*.whl
+        path: wheelhouse/*.whl
 
   build_arch_wheels:
     name: ${{ matrix.python }} on ${{ matrix.arch }}
@@ -113,13 +115,13 @@ jobs:
     - name: Install dependencies
       run: pip install cibuildwheel
     - name: Build Wheels
-      run: python -m cibuildwheel --output-dir "${OUTPUT_DIR}" "${PACKAGE_DIR}"
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
         CIBW_ARCHS: ${{ matrix.arch }}
     - uses: actions/upload-artifact@v2
       with:
-        path: ${{ env.OUTPUT_DIR }}/*.whl
+        path: wheelhouse/*.whl
 
   deploy:
     name: Upload if release
