@@ -20,7 +20,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     env:
       PROJECT_NAME: brotli
-      PACKAGE_DIR: "src/${PROJECT_NAME}"
+      PACKAGE_DIR: src/${{ env.PROJECT_NAME }}
       OUTPUT_DIR: wheelhouse
       CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python/ -p "*_test.py"
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
