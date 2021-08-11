@@ -2,8 +2,7 @@
 
 This repository is used to build and publish brotli "[wheels](https://pythonwheels.com/)" package.
 
-[![Travis CI Status](https://travis-ci.org/google/brotli-wheels.svg?branch=master)](https://travis-ci.org/google/brotli-wheels)
-[![Appveyor CI Status](https://ci.appveyor.com/api/projects/status/github/google/brotli-wheels?branch=master&svg=true)](https://ci.appveyor.com/project/szabadka/brotli-wheels)
+![CI Status](https://github.com/google/brotli-wheels/actions/workflows/ci.yml/badge.svg)
 
 ## What are wheels?
 Wheels are the new standard of Python distribution and are intended to replace eggs. 
