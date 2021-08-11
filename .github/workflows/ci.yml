@@ -21,7 +21,7 @@ jobs:
     env:
       PROJECT_NAME: brotli
       PACKAGE_DIR: src/brotli
-      OUTPUT_DIR: wheelhouse
+      OUTPUT_DIR: dist
       CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python/ -p "*_test.py"
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
       CIBW_MANYLINUX_I686_IMAGE: manylinux1
@@ -72,11 +72,6 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         path: ${{ env.OUTPUT_DIR }}/
-    - name: Move wheels to dist/ directory
-      run: |
-        ls "${OUTPUT_DIR}"/*
-        mkdir -p dist/
-        mv "${OUTPUT_DIR}/${PROJECT_NAME}"-wheels/*.whl dist/
     - name: Extract release notes from annotated tag message
       id: release_notes
       env:
@@ -121,5 +116,8 @@ jobs:
         else
           echo "DEBUG: This is a final release"
         fi
-        python setup.py sdist
-        twine upload dist/*
+        dist_dir="$(pwd)/${OUTPUT_DIR}"
+        pushd "${PACKAGE_DIR}"
+        python setup.py sdist --dist-dir "${dist_dir}"
+        popd
+        twine upload "${dist_dir}/${PROJECT_NAME}"-wheels/*.whl "${dist_dir}"/*.tar.gz
