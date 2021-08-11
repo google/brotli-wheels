@@ -44,7 +44,7 @@ jobs:
     - name: Install dependencies
       run: pip install cibuildwheel
     - name: Build Wheels
-      run: python -m cibuildwheel --package_dir "${PACKAGE_DIR}" --output-dir "${OUTPUT_DIR}"
+      run: python -m cibuildwheel --output-dir "${OUTPUT_DIR}" "${PACKAGE_DIR}"
     - uses: actions/upload-artifact@v2
       with:
         name: ${{ env.PROJECT_NAME }}-wheels
