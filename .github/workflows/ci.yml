@@ -58,7 +58,8 @@ jobs:
         build: ["*"]
         # temporarily disable building wheels for PyPy until this gets fixed:
         # https://github.com/google/brotli-wheels/issues/19
-        skip: ["pp*"]
+        # skip free-threaded Python builds until compatibility is verified
+        skip: ["pp* cp*t-*"]
         include:
           # manylinux2014 for all python versions (broader compatibility)
           - os: ubuntu-latest
@@ -71,12 +72,12 @@ jobs:
           - os: macos-latest
             arch: universal2
             build: "*"
-            skip: "pp*"
+            skip: "pp* cp*t-*"
 
           - os: windows-latest
             arch: auto32
             build: "*"
-            skip: "pp*"
+            skip: "pp* cp*t-*"
     steps:
     - uses: actions/checkout@v4
       with:
