@@ -24,7 +24,7 @@ This repository includes the [google/brotli](https://github.com/google/brotli) l
 ```bash
 cd src/brotli
 git fetch origin
-git checkout <TAG>  # e.g., v1.2.0rc1
+git checkout <TAG>  # e.g., v1.2.0
 cd ../..
 git add src/brotli
 git commit -m "Update brotli submodule to <TAG>"
@@ -47,7 +47,7 @@ This will automatically trigger GitHub Actions to build wheels for:
 To publish the built wheels to PyPI:
 
 1. Create a new GitHub release from the [Releases page](https://github.com/google/brotli-wheels/releases/new)
-2. Tag the release (e.g., `v1.2.0rc1`)
+2. Tag the release (e.g., `v1.2.0`)
 3. Publish the release
 
 The GitHub Actions workflow will automatically upload all built wheels and the source distribution to PyPI when a release is published.
