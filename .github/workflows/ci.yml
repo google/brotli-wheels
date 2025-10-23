@@ -347,14 +347,32 @@ jobs:
     - name: Configure distutils to use MinGW
       shell: pwsh
       run: |
-        # Create distutils.cfg to tell distutils to use mingw32 compiler
+        # Create distutils.cfg with compiler and build flags
         $pythonLib = "C:\Python27\Lib"
         $distutilsCfg = "$pythonLib\distutils\distutils.cfg"
-        @"
+        $pythonArch = "${{ matrix.python_arch }}"
+        if ($pythonArch -eq "amd64") {
+            # Add MS_WIN64 define for 64-bit builds
+            $content = @"
         [build]
         compiler=mingw32
-        "@ | Out-File -FilePath $distutilsCfg -Encoding ascii
-        Write-Host "Created $distutilsCfg"
+
+        [build_ext]
+        define=MS_WIN64
+        extra_link_args=-static-libgcc -static-libstdc++
+        "@
+        } else {
+            $content = @"
+        [build]
+        compiler=mingw32
+
+        [build_ext]
+        extra_link_args=-static-libgcc -static-libstdc++
+        "@
+        }
+        $content | Out-File -FilePath $distutilsCfg -Encoding ascii
+        Write-Host "Created $distutilsCfg with content:"
+        Get-Content $distutilsCfg
 
     - name: Build wheel
       shell: cmd
@@ -363,9 +381,6 @@ jobs:
         python -m pip install --upgrade "pip<21"
         python -m pip install "setuptools<45" "wheel<0.38"
         python setup.py bdist_wheel --dist-dir ..\..\wheelhouse
-      env:
-        # -DMS_WIN64 from https://stackoverflow.com/questions/18717996/python-x64-c-library-compiled-with-mingw-x64-on-windows7-py-initmodule4
-        CFLAGS: ${{ matrix.python_arch == 'amd64' && '-static-libgcc -static-libstdc++ -DMS_WIN64' || '-static-libgcc -static-libstdc++' }}
 
     - name: Test wheel
       shell: cmd
