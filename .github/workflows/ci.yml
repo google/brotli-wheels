@@ -329,6 +329,9 @@ jobs:
         C:\ProgramData\chocolatey\bin\gendef.exe C:\Windows\System32\python27.dll
         C:\ProgramData\chocolatey\bin\dlltool.exe --dllname python27.dll --def python27.def --output-lib libpython27.a
         echo.
+        echo Checking for required Python symbols in libpython27.a:
+        nm libpython27.a | findstr "Py_InitModule4" || echo ERROR: Py_InitModule4 not found!
+        echo.
         echo After:
         dir *.lib *.a
 
