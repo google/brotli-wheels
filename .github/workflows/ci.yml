@@ -150,11 +150,6 @@ jobs:
             CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
             CIBW_MANYLINUX_I686_IMAGE: manylinux2010
 
-          - os: macos-latest
-            arch: universal2
-            build: "cp{36,37}-*"
-            skip: "pp*"
-
           - os: windows-latest
             arch: auto32
             build: "cp{36,37}-*"
