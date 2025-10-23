@@ -297,32 +297,39 @@ jobs:
         python --version
         python -c "import struct; print(struct.calcsize('P') * 8)"
 
-    - name: Install Visual C++ for Python 2.7
+    - name: Install MinGW
       shell: pwsh
       run: |
-        $url = "https://web.archive.org/web/20210106040224if_/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
-        $installer = "$env:TEMP\VCForPython27.msi"
-        Write-Host "Downloading VCForPython27.msi..."
-        Invoke-WebRequest -Uri $url -OutFile $installer -UserAgent "Mozilla/5.0"
-        Write-Host "Installing VCForPython27..."
-        $process = Start-Process msiexec.exe -ArgumentList "/i `"$installer`" /quiet /norestart" -Wait -PassThru
-        if ($process.ExitCode -ne 0) {
-            Write-Error "Installation failed with exit code: $($process.ExitCode)"
-            exit $process.ExitCode
+        $pythonArch = "${{ matrix.python_arch }}"
+        if ($pythonArch -eq "x86") {
+            Write-Host "Installing MinGW-w64 32-bit..."
+            choco install mingw --version=11.2.0.07112021 --x86 -y --force
+        } else {
+            Write-Host "Installing MinGW-w64 64-bit..."
+            choco install mingw --version=11.2.0.07112021 -y --force
         }
-        Write-Host "VCForPython27 installed successfully"
+
+    - name: Configure distutils to use MinGW
+      shell: pwsh
+      run: |
+        # Create distutils.cfg to tell distutils to use mingw32 compiler
+        $pythonLib = "C:\Python27\Lib"
+        $distutilsCfg = "$pythonLib\distutils\distutils.cfg"
+        @"
+        [build]
+        compiler=mingw32
+        "@ | Out-File -FilePath $distutilsCfg -Encoding ascii
+        Write-Host "Created $distutilsCfg"
 
     - name: Build wheel
       shell: cmd
       run: |
-        call "%LOCALAPPDATA%\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" ${{ matrix.python_arch }}
         cd ${{ env.PACKAGE_DIR }}
         python -m pip install --upgrade "pip<21"
         python -m pip install "setuptools<45" "wheel<0.38"
         python -m pip wheel . --no-deps --no-use-pep517 --no-build-isolation -w ..\..\wheelhouse
       env:
-        DISTUTILS_USE_SDK: 1
-        MSSdk: 1
+        CFLAGS: -static-libgcc -static-libstdc++
 
     - name: Test wheel
       shell: cmd
