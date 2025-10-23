@@ -364,7 +364,8 @@ jobs:
         python -m pip install "setuptools<45" "wheel<0.38"
         python setup.py bdist_wheel --dist-dir ..\..\wheelhouse
       env:
-        CFLAGS: -static-libgcc -static-libstdc++
+        # -DMS_WIN64 from https://stackoverflow.com/questions/18717996/python-x64-c-library-compiled-with-mingw-x64-on-windows7-py-initmodule4
+        CFLAGS: ${{ matrix.python_arch == 'amd64' && '-static-libgcc -static-libstdc++ -DMS_WIN64' || '-static-libgcc -static-libstdc++' }}
 
     - name: Test wheel
       shell: cmd
