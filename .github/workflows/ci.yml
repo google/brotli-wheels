@@ -254,13 +254,22 @@ jobs:
       with:
         python-version: "3.x"
 
-    # Install Python 2.7 and VS compiler on Windows using Chocolatey
-    - name: Install Python 2.7 and compiler on Windows
+    # Install Python 2.7 on Windows using Chocolatey
+    - name: Install Python 2.7 on Windows
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
         choco install python2 --version=2.7.18 -y --force --x86=${{ matrix.arch == 'auto32' && 'true' || 'false' }}
-        choco install vcpython27 -y
+
+    # Install Visual C++ for Python 2.7 from Web Archive
+    - name: Install Visual C++ for Python 2.7 on Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $url = "https://web.archive.org/web/20210106040224if_/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
+        $installer = "$env:TEMP\VCForPython27.msi"
+        Invoke-WebRequest -Uri $url -OutFile $installer -UserAgent "Mozilla/5.0"
+        Start-Process msiexec.exe -ArgumentList "/i `"$installer`" /quiet /norestart" -Wait
 
     - name: Install dependencies
       run: pip install cibuildwheel==1.12.0
