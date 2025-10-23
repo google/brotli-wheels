@@ -264,6 +264,15 @@ jobs:
         Invoke-WebRequest -Uri $url -OutFile $installer -UserAgent "Mozilla/5.0"
         Start-Process msiexec.exe -ArgumentList "/i `"$installer`" /quiet /norestart" -Wait
 
+    - name: Verify VC for Python 2.7 installation
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Write-Host "Searching for vcvarsall.bat..."
+        Get-ChildItem -Path "C:\Program Files*" -Recurse -Filter "vcvarsall.bat" -ErrorAction SilentlyContinue | Select-Object FullName
+        Write-Host "`nSearching for Visual C++ for Python..."
+        Get-ChildItem -Path "C:\Program Files*" -Recurse -Directory -Filter "*Visual C++*" -ErrorAction SilentlyContinue | Select-Object FullName
+
     - name: Install dependencies
       run: pip install cibuildwheel==1.12.0
 
