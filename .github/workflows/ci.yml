@@ -228,24 +228,6 @@ jobs:
             type: macos
             CIBW_MANYLINUX_X86_64_IMAGE: ""
             CIBW_MANYLINUX_I686_IMAGE: ""
-
-          # Windows 64-bit
-          - os: windows-latest
-            arch: auto64
-            build: "cp27-*"
-            type: windows
-            vcvars_arch: amd64
-            CIBW_MANYLINUX_X86_64_IMAGE: ""
-            CIBW_MANYLINUX_I686_IMAGE: ""
-
-          # Windows 32-bit
-          - os: windows-latest
-            arch: auto32
-            build: "cp27-*"
-            type: windows
-            vcvars_arch: x86
-            CIBW_MANYLINUX_X86_64_IMAGE: ""
-            CIBW_MANYLINUX_I686_IMAGE: ""
     steps:
     - uses: actions/checkout@v4
       with:
@@ -256,9 +238,68 @@ jobs:
       with:
         python-version: "3.x"
 
-    # Install Visual C++ for Python 2.7 from Web Archive
-    - name: Install Visual C++ for Python 2.7 on Windows
-      if: runner.os == 'Windows'
+    - name: Install dependencies
+      run: pip install cibuildwheel==1.12.0
+
+    - name: Build Wheels
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
+      env:
+        CIBW_BUILD: ${{ matrix.build }}
+        CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
+        CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
+        CIBW_ARCHS: ${{ matrix.arch }}
+        # Enable C99 for Python 2.7 (brotli requires it)
+        CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
+
+    - uses: actions/upload-artifact@v4
+      with:
+        path: wheelhouse/*.whl
+        name: wheels-py27-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.type }}
+
+  build_wheels_py27_windows:
+    name: Python 2.7 on Windows ${{ matrix.arch }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            python_arch: amd64
+          - arch: x86
+            python_arch: x86
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Set up Python 3.x (for running scripts)
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+
+    - name: Install Python 2.7 via nuget
+      shell: pwsh
+      run: |
+        $pythonArch = "${{ matrix.python_arch }}"
+        # nuget package names: 'python' for x64, 'pythonx86' for x86
+        $packageName = if ($pythonArch -eq "x86") { "pythonx86" } else { "python" }
+        Write-Host "Installing Python 2.7 ($packageName) for $pythonArch..."
+        nuget install $packageName -Version 2.7.18 -OutputDirectory $env:TEMP\python27
+        # Find the installed directory (name varies by package)
+        $pythonDir = Get-ChildItem "$env:TEMP\python27" -Directory | Where-Object { $_.Name -like "python*2.7.18" } | Select-Object -First 1
+        $pythonPath = Join-Path $pythonDir.FullName "tools"
+        Write-Host "Python installed to: $pythonPath"
+        # Prepend to PATH so 'python' command uses Python 2.7
+        echo "$pythonPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "PYTHON27_PATH=$pythonPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Verify Python 2.7 installation
+      shell: cmd
+      run: |
+        python --version
+        python -c "import struct; print(struct.calcsize('P') * 8)"
+
+    - name: Install Visual C++ for Python 2.7
       shell: pwsh
       run: |
         $url = "https://web.archive.org/web/20210106040224if_/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
@@ -273,52 +314,32 @@ jobs:
         }
         Write-Host "VCForPython27 installed successfully"
 
-    - name: Verify VC for Python 2.7 installation
-      if: runner.os == 'Windows'
-      shell: pwsh
+    - name: Build wheel
+      shell: cmd
       run: |
-        Write-Host "Searching for vcvarsall.bat in known locations..."
-        $paths = @(
-            "C:\Program Files (x86)\Common Files\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat",
-            "C:\Program Files\Common Files\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat",
-            "$env:LOCALAPPDATA\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat"
-        )
-        foreach ($path in $paths) {
-            if (Test-Path $path) {
-                Write-Host "Found: $path"
-            }
-        }
-        Write-Host "`nSearching in Program Files (x86)\Common Files\Microsoft..."
-        Get-ChildItem -Path "C:\Program Files (x86)\Common Files\Microsoft" -Recurse -Filter "vcvarsall.bat" -ErrorAction SilentlyContinue | Select-Object FullName
-
-    - name: Install dependencies
-      run: pip install cibuildwheel==1.12.0
-
-    - name: Build Wheels
-      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
+        call "%LOCALAPPDATA%\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" ${{ matrix.python_arch }}
+        cd ${{ env.PACKAGE_DIR }}
+        python -m pip install --upgrade "pip<21"
+        python -m pip install "setuptools<45" "wheel<0.38"
+        python -m pip wheel . --no-deps -w ..\..\wheelhouse
       env:
-        CIBW_BUILD: ${{ matrix.build }}
-        CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
-        CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
-        CIBW_ARCHS: ${{ matrix.arch }}
-        # Enable C99 for Python 2.7 (brotli requires it)
-        CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
-        # Call vcvarsall.bat and install build requirements before building (Windows only)
-        CIBW_BEFORE_BUILD_WINDOWS: call "%LOCALAPPDATA%\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" ${{ matrix.vcvars_arch || 'amd64' }} && pip install "setuptools<45" "wheel<0.38"
-        # Disable isolated builds and set distutils flags for Windows Python 2.7 compilation
-        CIBW_ENVIRONMENT_WINDOWS: "DISTUTILS_USE_SDK=1 MSSdk=1 PIP_NO_BUILD_ISOLATION=1"
-        # Also need these at top-level for cibuildwheel to detect Python 2.7 on Windows
-        DISTUTILS_USE_SDK: ${{ runner.os == 'Windows' && '1' || '' }}
-        MSSdk: ${{ runner.os == 'Windows' && '1' || '' }}
+        DISTUTILS_USE_SDK: 1
+        MSSdk: 1
+
+    - name: Test wheel
+      shell: cmd
+      run: |
+        python -m pip install wheelhouse\*.whl
+        python -m unittest discover -v -s ${{ env.PACKAGE_DIR }}\python\ -p "*_test.py"
 
     - uses: actions/upload-artifact@v4
       with:
         path: wheelhouse/*.whl
-        name: wheels-py27-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.type }}
+        name: wheels-py27-windows-${{ matrix.arch }}
 
   deploy:
     name: Upload if release
-    needs: [build_wheels, build_arch_wheels, build_wheels_py36_37, build_arch_wheels_py36_37, build_wheels_py27, build_sdist]
+    needs: [build_wheels, build_arch_wheels, build_wheels_py36_37, build_arch_wheels_py36_37, build_wheels_py27, build_wheels_py27_windows, build_sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
