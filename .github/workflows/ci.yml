@@ -261,17 +261,33 @@ jobs:
       run: |
         $url = "https://web.archive.org/web/20210106040224if_/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
         $installer = "$env:TEMP\VCForPython27.msi"
+        Write-Host "Downloading VCForPython27.msi..."
         Invoke-WebRequest -Uri $url -OutFile $installer -UserAgent "Mozilla/5.0"
-        Start-Process msiexec.exe -ArgumentList "/i `"$installer`" /quiet /norestart" -Wait
+        Write-Host "Installing VCForPython27..."
+        $process = Start-Process msiexec.exe -ArgumentList "/i `"$installer`" /quiet /norestart" -Wait -PassThru
+        if ($process.ExitCode -ne 0) {
+            Write-Error "Installation failed with exit code: $($process.ExitCode)"
+            exit $process.ExitCode
+        }
+        Write-Host "VCForPython27 installed successfully"
 
     - name: Verify VC for Python 2.7 installation
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        Write-Host "Searching for vcvarsall.bat..."
-        Get-ChildItem -Path "C:\Program Files*" -Recurse -Filter "vcvarsall.bat" -ErrorAction SilentlyContinue | Select-Object FullName
-        Write-Host "`nSearching for Visual C++ for Python..."
-        Get-ChildItem -Path "C:\Program Files*" -Recurse -Directory -Filter "*Visual C++*" -ErrorAction SilentlyContinue | Select-Object FullName
+        Write-Host "Searching for vcvarsall.bat in known locations..."
+        $paths = @(
+            "C:\Program Files (x86)\Common Files\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat",
+            "C:\Program Files\Common Files\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat",
+            "$env:LOCALAPPDATA\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat"
+        )
+        foreach ($path in $paths) {
+            if (Test-Path $path) {
+                Write-Host "Found: $path"
+            }
+        }
+        Write-Host "`nSearching in Program Files (x86)\Common Files\Microsoft..."
+        Get-ChildItem -Path "C:\Program Files (x86)\Common Files\Microsoft" -Recurse -Filter "vcvarsall.bat" -ErrorAction SilentlyContinue | Select-Object FullName
 
     - name: Install dependencies
       run: pip install cibuildwheel==1.12.0
