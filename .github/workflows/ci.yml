@@ -302,7 +302,7 @@ jobs:
         # Enable C99 for Python 2.7 (brotli requires it)
         CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
         # Required for Windows Python 2.7 compilation - point to actual install location
-        CIBW_ENVIRONMENT_WINDOWS: "DISTUTILS_USE_SDK=1 MSSdk=1 VS90COMNTOOLS=%LOCALAPPDATA%\\Programs\\Common\\Microsoft\\Visual C++ for Python\\9.0\\"
+        CIBW_ENVIRONMENT_WINDOWS: "DISTUTILS_USE_SDK=1 MSSdk=1 VS90COMNTOOLS='%LOCALAPPDATA%\\Programs\\Common\\Microsoft\\Visual C++ for Python\\9.0\\'"
         # Also need these at top-level for cibuildwheel to detect Python 2.7 on Windows
         DISTUTILS_USE_SDK: ${{ runner.os == 'Windows' && '1' || '' }}
         MSSdk: ${{ runner.os == 'Windows' && '1' || '' }}
