@@ -319,7 +319,7 @@ jobs:
         cd ${{ env.PACKAGE_DIR }}
         python -m pip install --upgrade "pip<21"
         python -m pip install "setuptools<45" "wheel<0.38"
-        python -m pip wheel . --no-deps --no-build-isolation -w ..\..\wheelhouse
+        python -m pip wheel . --no-deps --no-use-pep517 --no-build-isolation -w ..\..\wheelhouse
       env:
         DISTUTILS_USE_SDK: 1
         MSSdk: 1
