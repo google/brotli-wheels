@@ -281,9 +281,13 @@ jobs:
       shell: pwsh
       run: |
         $pythonArch = "${{ matrix.python_arch }}"
-        $forceX86 = if ($pythonArch -eq "x86") { "--x86" } else { "" }
-        Write-Host "Installing Python 2.7 for $pythonArch..."
-        choco install python2 --version=2.7.18 -y $forceX86
+        if ($pythonArch -eq "x86") {
+            Write-Host "Installing Python 2.7 32-bit..."
+            choco install python2 --version=2.7.18 --x86 -y --force
+        } else {
+            Write-Host "Installing Python 2.7 64-bit..."
+            choco install python2 --version=2.7.18 --forcex64 -y --force
+        }
         # Python 2.7 installs to C:\Python27 (or C:\Python27-x86 for x86 on x64 host)
         $pythonPath = if ($pythonArch -eq "x86" -and (Test-Path "C:\Python27-x86")) { "C:\Python27-x86" } else { "C:\Python27" }
         Write-Host "Python installed to: $pythonPath"
@@ -298,8 +302,6 @@ jobs:
         python -c "import struct; print(struct.calcsize('P') * 8)"
         python -c "import sys; print('Python executable: ' + sys.executable)"
         python -c "import sys; print('Python prefix: ' + sys.prefix)"
-        where python.exe
-        where python27.dll
 
     - name: Install MinGW
       shell: pwsh
@@ -353,7 +355,7 @@ jobs:
         cd ${{ env.PACKAGE_DIR }}
         python -m pip install --upgrade "pip<21"
         python -m pip install "setuptools<45" "wheel<0.38"
-        python -m pip wheel . --no-deps --no-build-isolation -w ..\..\wheelhouse
+        python setup.py bdist_wheel --dist-dir ..\..\wheelhouse
       env:
         CFLAGS: -static-libgcc -static-libstdc++
 
