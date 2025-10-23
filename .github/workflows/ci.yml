@@ -310,36 +310,13 @@ jobs:
         }
 
     - name: Create MinGW-compatible Python import library
-      shell: pwsh
+      shell: cmd
       run: |
-        Write-Host "Finding python27.dll..."
-        $dll = Get-ChildItem -Path C:\Python27 -Recurse -Filter python27.dll -ErrorAction SilentlyContinue | Select-Object -First 1
-        if (-not $dll) {
-            $dll = Get-ChildItem -Path C:\Windows\System32 -Filter python27.dll -ErrorAction SilentlyContinue | Select-Object -First 1
-        }
-        if (-not $dll) {
-            Write-Error "Could not find python27.dll"
-            exit 1
-        }
-        Write-Host "Found python27.dll at: $($dll.FullName)"
-
-        cd C:\Python27
-        Write-Host "Removing any existing libmsvcr90.a from libs (per numpy wiki)"
-        Remove-Item libs\libmsvcr90.a -ErrorAction SilentlyContinue
-
-        Write-Host "Running gendef on python27.dll"
-        & gendef - $dll.FullName | Out-File -Encoding ascii python27.def
-
-        if (-not (Test-Path python27.def) -or (Get-Content python27.def | Select-String "Py_Initialize").Count -eq 0) {
-            Write-Error "Failed to create valid python27.def"
-            Get-Content python27.def | Select-Object -First 20
-            exit 1
-        }
-
-        Write-Host "Running dlltool"
-        & dlltool --dllname python27.dll --def python27.def --output-lib libpython27.a
-        Move-Item libpython27.a libs\
-        Get-Item libs\libpython27.a
+        cd C:\Python27\libs
+        if exist libmsvcr90.a del libmsvcr90.a
+        C:\ProgramData\chocolatey\bin\gendef.exe C:\Windows\System32\python27.dll
+        C:\ProgramData\chocolatey\bin\dlltool.exe --dllname python27.dll --def python27.def --output-lib libpython27.a
+        dir libpython27.a
 
     - name: Configure distutils to use MinGW
       shell: pwsh
