@@ -378,6 +378,34 @@ jobs:
         python -m pip install "setuptools<45" "wheel<0.38"
         python setup.py bdist_wheel --dist-dir ..\..\wheelhouse
 
+    - name: Verify static linking
+      shell: pwsh
+      run: |
+        # Extract wheel and check DLL dependencies
+        $wheel = Get-ChildItem wheelhouse\*.whl | Select-Object -First 1
+        Write-Host "Checking wheel: $($wheel.Name)"
+
+        # Extract wheel (it's just a zip file)
+        $extractDir = "wheel_extracted"
+        Expand-Archive -Path $wheel.FullName -DestinationPath $extractDir -Force
+
+        # Find the .pyd file
+        $pydFile = Get-ChildItem -Path $extractDir -Filter "_brotli*.pyd" -Recurse | Select-Object -First 1
+        Write-Host "`nFound extension: $($pydFile.FullName)"
+
+        # Check DLL dependencies using objdump (already in PATH from MinGW)
+        Write-Host "`nDLL Dependencies:"
+        objdump -p $pydFile.FullName | Select-String "DLL Name:"
+
+        # Check for unwanted MinGW DLLs
+        $deps = objdump -p $pydFile.FullName | Select-String "DLL Name:"
+        if ($deps -match "libgcc|libstdc\+\+") {
+            Write-Error "ERROR: Found MinGW runtime DLL dependencies - static linking failed!"
+            exit 1
+        } else {
+            Write-Host "`nSUCCESS: No MinGW runtime DLL dependencies found - static linking worked!"
+        }
+
     - name: Test wheel
       shell: cmd
       run: |
