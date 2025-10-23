@@ -317,10 +317,20 @@ jobs:
       shell: cmd
       run: |
         cd C:\Python27\libs
+        echo Before cleanup:
+        dir *.lib *.a
+        echo.
+        echo Removing MSVC import libraries...
+        if exist python27.lib ren python27.lib python27.lib.bak
         if exist libmsvcr90.a del libmsvcr90.a
+        if exist msvcr90.lib ren msvcr90.lib msvcr90.lib.bak
+        echo.
+        echo Creating MinGW import library...
         C:\ProgramData\chocolatey\bin\gendef.exe C:\Windows\System32\python27.dll
         C:\ProgramData\chocolatey\bin\dlltool.exe --dllname python27.dll --def python27.def --output-lib libpython27.a
-        dir libpython27.a
+        echo.
+        echo After:
+        dir *.lib *.a
 
     - name: Configure distutils to use MinGW
       shell: pwsh
