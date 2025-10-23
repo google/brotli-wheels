@@ -277,21 +277,19 @@ jobs:
       with:
         python-version: "3.x"
 
-    - name: Install Python 2.7 via nuget
+    - name: Install Python 2.7 via Chocolatey
       shell: pwsh
       run: |
         $pythonArch = "${{ matrix.python_arch }}"
-        # nuget package names: 'python' for x64, 'pythonx86' for x86
-        $packageName = if ($pythonArch -eq "x86") { "pythonx86" } else { "python" }
-        Write-Host "Installing Python 2.7 ($packageName) for $pythonArch..."
-        nuget install $packageName -Version 2.7.18 -OutputDirectory $env:TEMP\python27
-        # Find the installed directory (name varies by package)
-        $pythonDir = Get-ChildItem "$env:TEMP\python27" -Directory | Where-Object { $_.Name -like "python*2.7.18" } | Select-Object -First 1
-        $pythonPath = Join-Path $pythonDir.FullName "tools"
+        $forceX86 = if ($pythonArch -eq "x86") { "--x86" } else { "" }
+        Write-Host "Installing Python 2.7 for $pythonArch..."
+        choco install python2 --version=2.7.18 -y $forceX86
+        # Python 2.7 installs to C:\Python27 (or C:\Python27-x86 for x86 on x64 host)
+        $pythonPath = if ($pythonArch -eq "x86" -and (Test-Path "C:\Python27-x86")) { "C:\Python27-x86" } else { "C:\Python27" }
         Write-Host "Python installed to: $pythonPath"
         # Prepend to PATH so 'python' command uses Python 2.7
         echo "$pythonPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        echo "PYTHON27_PATH=$pythonPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "$pythonPath\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     - name: Verify Python 2.7 installation
       shell: cmd
