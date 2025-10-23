@@ -310,10 +310,14 @@ jobs:
         if ($pythonArch -eq "x86") {
             Write-Host "Installing MinGW-w64 32-bit..."
             choco install mingw --version=11.2.0.07112021 --x86 -y --force
+            $mingwBin = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin"
         } else {
             Write-Host "Installing MinGW-w64 64-bit..."
             choco install mingw --version=11.2.0.07112021 -y --force
+            $mingwBin = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
         }
+        Write-Host "Prepending $mingwBin to PATH"
+        echo "$mingwBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     - name: Create MinGW-compatible Python import library
       shell: cmd
