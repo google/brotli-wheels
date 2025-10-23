@@ -254,13 +254,6 @@ jobs:
       with:
         python-version: "3.x"
 
-    # Install Python 2.7 on Windows using Chocolatey
-    - name: Install Python 2.7 on Windows
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        choco install python2 --version=2.7.18 -y --force --x86=${{ matrix.arch == 'auto32' && 'true' || 'false' }}
-
     # Install Visual C++ for Python 2.7 from Web Archive
     - name: Install Visual C++ for Python 2.7 on Windows
       if: runner.os == 'Windows'
@@ -285,6 +278,9 @@ jobs:
         CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
         # Required for Windows Python 2.7 compilation
         CIBW_ENVIRONMENT_WINDOWS: "DISTUTILS_USE_SDK=1 MSSdk=1"
+        # Also need these at top-level for cibuildwheel to detect Python 2.7 on Windows
+        DISTUTILS_USE_SDK: ${{ runner.os == 'Windows' && '1' || '' }}
+        MSSdk: ${{ runner.os == 'Windows' && '1' || '' }}
 
     - uses: actions/upload-artifact@v4
       with:
