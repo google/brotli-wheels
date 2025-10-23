@@ -278,6 +278,8 @@ jobs:
         CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
         # Required for Windows Python 2.7 compilation
         CIBW_ENVIRONMENT_WINDOWS: "DISTUTILS_USE_SDK=1 MSSdk=1"
+        # Set up Visual C++ compiler paths before building on Windows
+        CIBW_BEFORE_BUILD_WINDOWS: 'call "C:\Program Files (x86)\Common Files\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" ${{ matrix.arch == ''auto32'' && ''x86'' || ''amd64'' }}'
         # Also need these at top-level for cibuildwheel to detect Python 2.7 on Windows
         DISTUTILS_USE_SDK: ${{ runner.os == 'Windows' && '1' || '' }}
         MSSdk: ${{ runner.os == 'Windows' && '1' || '' }}
