@@ -347,7 +347,7 @@ jobs:
     - name: Configure distutils to use MinGW
       shell: pwsh
       run: |
-        # Create distutils.cfg with compiler and build flags
+        # Create distutils.cfg with compiler selection
         $pythonLib = "C:\Python27\Lib"
         $distutilsCfg = "$pythonLib\distutils\distutils.cfg"
         $pythonArch = "${{ matrix.python_arch }}"
@@ -359,15 +359,11 @@ jobs:
 
         [build_ext]
         define=MS_WIN64
-        extra_link_args=-static-libgcc -static-libstdc++
         "@
         } else {
             $content = @"
         [build]
         compiler=mingw32
-
-        [build_ext]
-        extra_link_args=-static-libgcc -static-libstdc++
         "@
         }
         $content | Out-File -FilePath $distutilsCfg -Encoding ascii
@@ -381,6 +377,8 @@ jobs:
         python -m pip install --upgrade "pip<21"
         python -m pip install "setuptools<45" "wheel<0.38"
         python setup.py bdist_wheel --dist-dir ..\..\wheelhouse
+      env:
+        LDFLAGS: -static-libgcc -static-libstdc++
 
     - name: Test wheel
       shell: cmd
