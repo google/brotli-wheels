@@ -281,6 +281,8 @@ jobs:
         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
         CIBW_ARCHS: ${{ matrix.arch }}
+        # Enable C99 for Python 2.7 (brotli requires it)
+        CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
         # Required for Windows Python 2.7 compilation
         DISTUTILS_USE_SDK: ${{ runner.os == 'Windows' && '1' || '' }}
         MSSdk: ${{ runner.os == 'Windows' && '1' || '' }}
