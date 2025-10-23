@@ -55,13 +55,13 @@ jobs:
         # the x86_64 wheel on/for x86_64 macs
         os: [macos-13, windows-latest]
         arch: [auto64]
-        build: ["*"]
+        build: ["cp{38,39,310,311,312,313,314}-*"]
         # temporarily disable building wheels for PyPy until this gets fixed:
         # https://github.com/google/brotli-wheels/issues/19
         # skip free-threaded Python builds until compatibility is verified
         skip: ["pp* cp*t-*"]
         include:
-          # manylinux2014 for all python versions (broader compatibility)
+          # manylinux2014 for python 3.8+ (broader compatibility)
           - os: ubuntu-latest
             arch: auto
             type: manylinux2014
@@ -71,12 +71,12 @@ jobs:
 
           - os: macos-latest
             arch: universal2
-            build: "*"
+            build: "cp{38,39,310,311,312,313,314}-*"
             skip: "pp* cp*t-*"
 
           - os: windows-latest
             arch: auto32
-            build: "*"
+            build: "cp{38,39,310,311,312,313,314}-*"
             skip: "pp* cp*t-*"
     steps:
     - uses: actions/checkout@v4
@@ -128,9 +128,164 @@ jobs:
         path: wheelhouse/*.whl
         name: wheels-${{ matrix.arch }}-${{ matrix.python }}
 
+  build_wheels_py36_37:
+    name: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }} (py36-37)
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-13, windows-latest]
+        arch: [auto64]
+        build: ["cp{36,37}-*"]
+        skip: ["pp*"]
+        include:
+          # manylinux2010 for python 3.6-3.7 (these versions not in manylinux2014)
+          - os: ubuntu-latest
+            arch: auto
+            type: manylinux2010
+            build: "cp{36,37}-*"
+            CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
+            CIBW_MANYLINUX_I686_IMAGE: manylinux2010
+
+          - os: macos-latest
+            arch: universal2
+            build: "cp{36,37}-*"
+            skip: "pp*"
+
+          - os: windows-latest
+            arch: auto32
+            build: "cp{36,37}-*"
+            skip: "pp*"
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+    - name: Install dependencies
+      run: pip install cibuildwheel==2.23.3
+    - name: Build Wheels
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
+      env:
+        CIBW_BUILD: ${{ matrix.build }}
+        CIBW_SKIP: ${{ matrix.skip }}
+        CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
+        CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
+        CIBW_ARCHS: ${{ matrix.arch }}
+    - uses: actions/upload-artifact@v4
+      with:
+        path: wheelhouse/*.whl
+        name: wheels-py36-37-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.type }}
+
+  build_arch_wheels_py36_37:
+    name: py${{ matrix.python }} on ${{ matrix.arch }} (py36-37)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [36, 37]
+        arch: [aarch64, ppc64le]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - uses: docker/setup-qemu-action@v3
+      with:
+        platforms: all
+    - name: Install dependencies
+      run: pip install cibuildwheel==2.23.3
+    - name: Build Wheels
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
+      env:
+        CIBW_BUILD: cp${{ matrix.python }}-*
+        CIBW_ARCHS: ${{ matrix.arch }}
+    - uses: actions/upload-artifact@v4
+      with:
+        path: wheelhouse/*.whl
+        name: wheels-py36-37-${{ matrix.arch }}-${{ matrix.python }}
+
+  build_wheels_py27:
+    name: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }} (py27)
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-13, windows-latest]
+        arch: [auto64]
+        build: ["cp27-*"]
+        skip: [""]
+        include:
+          # manylinux2010 for python 2.7
+          - os: ubuntu-latest
+            arch: auto
+            type: manylinux2010
+            build: "cp27-*"
+            CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
+            CIBW_MANYLINUX_I686_IMAGE: manylinux2010
+
+          - os: windows-latest
+            arch: auto32
+            build: "cp27-*"
+            skip: ""
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+    - name: Install dependencies
+      run: pip install cibuildwheel==1.12.0
+    - name: Build Wheels
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
+      env:
+        CIBW_BUILD: ${{ matrix.build }}
+        CIBW_SKIP: ${{ matrix.skip }}
+        CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
+        CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
+        CIBW_ARCHS: ${{ matrix.arch }}
+    - uses: actions/upload-artifact@v4
+      with:
+        path: wheelhouse/*.whl
+        name: wheels-py27-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.type }}
+
+  build_arch_wheels_py27:
+    name: py${{ matrix.python }} on ${{ matrix.arch }} (py27)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [27]
+        arch: [aarch64, ppc64le]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - uses: docker/setup-qemu-action@v3
+      with:
+        platforms: all
+    - name: Install dependencies
+      run: pip install cibuildwheel==1.12.0
+    - name: Build Wheels
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
+      env:
+        CIBW_BUILD: cp${{ matrix.python }}-*
+        CIBW_ARCHS: ${{ matrix.arch }}
+    - uses: actions/upload-artifact@v4
+      with:
+        path: wheelhouse/*.whl
+        name: wheels-py27-${{ matrix.arch }}-${{ matrix.python }}
+
   deploy:
     name: Upload if release
-    needs: [build_wheels, build_arch_wheels, build_sdist]
+    needs: [build_wheels, build_arch_wheels, build_wheels_py36_37, build_arch_wheels_py36_37, build_wheels_py27, build_arch_wheels_py27, build_sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
