@@ -272,7 +272,7 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Set up Python 3.x (for running scripts)
+    - name: Set up Python 3.x
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
@@ -323,23 +323,14 @@ jobs:
       shell: cmd
       run: |
         cd C:\Python27\libs
-        echo Before cleanup:
-        dir *.lib *.a
-        echo.
         echo Removing MSVC import libraries...
         if exist python27.lib ren python27.lib python27.lib.bak
         if exist libmsvcr90.a del libmsvcr90.a
         if exist msvcr90.lib ren msvcr90.lib msvcr90.lib.bak
         echo.
-        echo Locating MinGW tools...
-        where gendef.exe
-        where dlltool.exe
         echo Creating MinGW import library...
         gendef C:\Windows\System32\python27.dll
         dlltool --dllname python27.dll --def python27.def --output-lib libpython27.a
-        echo.
-        echo Checking for required Python symbols in libpython27.a:
-        nm libpython27.a | findstr "Py_InitModule4" || echo ERROR: Py_InitModule4 not found!
         echo.
         echo After:
         dir *.lib *.a
