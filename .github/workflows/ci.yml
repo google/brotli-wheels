@@ -296,6 +296,10 @@ jobs:
       run: |
         python --version
         python -c "import struct; print(struct.calcsize('P') * 8)"
+        python -c "import sys; print('Python executable: ' + sys.executable)"
+        python -c "import sys; print('Python prefix: ' + sys.prefix)"
+        where python.exe
+        where python27.dll
 
     - name: Install MinGW
       shell: pwsh
