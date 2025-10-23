@@ -309,6 +309,14 @@ jobs:
             choco install mingw --version=11.2.0.07112021 -y --force
         }
 
+    - name: Create MinGW-compatible Python import library
+      shell: cmd
+      run: |
+        cd C:\Python27\libs
+        gendef C:\Python27\python27.dll
+        dlltool --dllname python27.dll --def python27.def --output-lib libpython27.a
+        dir libpython27.a
+
     - name: Configure distutils to use MinGW
       shell: pwsh
       run: |
