@@ -313,6 +313,7 @@ jobs:
       shell: cmd
       run: |
         cd C:\Python27
+        dir python27.dll
         gendef python27.dll
         dlltool --dllname python27.dll --def python27.def --output-lib libpython27.a
         move libpython27.a libs\
