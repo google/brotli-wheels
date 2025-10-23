@@ -234,6 +234,7 @@ jobs:
             arch: auto64
             build: "cp27-*"
             type: windows
+            vcvars_arch: amd64
             CIBW_MANYLINUX_X86_64_IMAGE: ""
             CIBW_MANYLINUX_I686_IMAGE: ""
 
@@ -242,6 +243,7 @@ jobs:
             arch: auto32
             build: "cp27-*"
             type: windows
+            vcvars_arch: x86
             CIBW_MANYLINUX_X86_64_IMAGE: ""
             CIBW_MANYLINUX_I686_IMAGE: ""
     steps:
@@ -301,11 +303,10 @@ jobs:
         CIBW_ARCHS: ${{ matrix.arch }}
         # Enable C99 for Python 2.7 (brotli requires it)
         CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
-        # Required for Windows Python 2.7 compilation - point to actual install location
-        CIBW_ENVIRONMENT_WINDOWS: "DISTUTILS_USE_SDK=1 MSSdk=1 VS90COMNTOOLS='%LOCALAPPDATA%\\Programs\\Common\\Microsoft\\Visual C++ for Python\\9.0\\'"
-        # Also need these at top-level for cibuildwheel to detect Python 2.7 on Windows
-        DISTUTILS_USE_SDK: ${{ runner.os == 'Windows' && '1' || '' }}
-        MSSdk: ${{ runner.os == 'Windows' && '1' || '' }}
+        # Call vcvarsall.bat and install build requirements before building (Windows only)
+        CIBW_BEFORE_BUILD_WINDOWS: call "%LOCALAPPDATA%\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" ${{ matrix.vcvars_arch || 'amd64' }} && pip install "setuptools<45" "wheel<0.38"
+        # Disable isolated builds and set distutils flags for Windows Python 2.7 compilation
+        CIBW_ENVIRONMENT_WINDOWS: "DISTUTILS_USE_SDK=1 MSSdk=1 PIP_NO_BUILD_ISOLATION=1"
 
     - uses: actions/upload-artifact@v4
       with:
