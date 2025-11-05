@@ -420,6 +420,21 @@ jobs:
         path: dist
         merge-multiple: true
 
+    - name: Normalize wheel names
+      run: |
+        # PEP 625 requires wheel filenames to use the normalized project name
+        # (lowercase with hyphens). PyPI now enforces this and rejects wheels with
+        # capitalized names like "Brotli-" (instead of "brotli-"), which are still
+        # produced by older python versions' setuptools (python<3.8). This is a
+        # temporary workaround to rename such wheels before attempting to upload.
+        for wheel in dist/Brotli-*.whl; do
+          if [ -f "$wheel" ]; then
+            newname="${wheel/Brotli-/brotli-}"
+            mv "$wheel" "$newname"
+            echo "Renamed: $(basename "$wheel") -> $(basename "$newname")"
+          fi
+        done
+
     - uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
