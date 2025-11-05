@@ -31,6 +31,10 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
+    # PEP 625 requires normalized (lowercase) package names in wheel metadata.
+    # The upstream brotli setup.py uses "Brotli" which causes PyPI to reject uploads.
+    - name: Patch setup.py to use normalized package name
+      run: git apply ../../normalize-package-name.patch
     - name: Install dependencies
       run: pip install --upgrade setuptools twine
     - name: Build sdist
@@ -86,6 +90,8 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
+    - name: Patch setup.py to use normalized package name
+      run: git apply --directory="${PACKAGE_DIR}" normalize-package-name.patch
     - name: Install dependencies
       run: pip install cibuildwheel
     - name: Build Wheels
@@ -116,6 +122,8 @@ jobs:
     - uses: docker/setup-qemu-action@v3
       with:
         platforms: all
+    - name: Patch setup.py to use normalized package name
+      run: git apply --directory="${PACKAGE_DIR}" normalize-package-name.patch
     - name: Install dependencies
       run: pip install cibuildwheel
     - name: Build Wheels
@@ -162,6 +170,8 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
+    - name: Patch setup.py to use normalized package name
+      run: git apply --directory="${PACKAGE_DIR}" normalize-package-name.patch
     - name: Install dependencies
       run: pip install cibuildwheel==2.23.3
     - name: Build Wheels
@@ -191,6 +201,8 @@ jobs:
     - uses: docker/setup-qemu-action@v3
       with:
         platforms: all
+    - name: Patch setup.py to use normalized package name
+      run: git apply --directory="${PACKAGE_DIR}" normalize-package-name.patch
     - name: Install dependencies
       run: pip install cibuildwheel==2.23.3
     - name: Build Wheels
@@ -238,6 +250,12 @@ jobs:
       with:
         python-version: "3.x"
 
+    - name: Patch setup.py to use normalized package name
+      run: |
+        # PEP 625 requires normalized (lowercase) package names in wheel metadata
+        sed -i.bak 's/NAME = "Brotli"/NAME = "brotli"/' "${PACKAGE_DIR}/setup.py"
+        grep 'NAME = ' "${PACKAGE_DIR}/setup.py"
+
     - name: Install dependencies
       run: pip install cibuildwheel==1.12.0
 
@@ -276,6 +294,9 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
+
+    - name: Patch setup.py to use normalized package name
+      run: git apply --directory="${{ env.PACKAGE_DIR }}" normalize-package-name.patch
 
     - name: Install Python 2.7 via Chocolatey
       shell: pwsh
@@ -419,21 +440,6 @@ jobs:
       with:
         path: dist
         merge-multiple: true
-
-    - name: Normalize wheel names
-      run: |
-        # PEP 625 requires wheel filenames to use the normalized project name
-        # (lowercase with hyphens). PyPI now enforces this and rejects wheels with
-        # capitalized names like "Brotli-" (instead of "brotli-"), which are still
-        # produced by older python versions' setuptools (python<3.8). This is a
-        # temporary workaround to rename such wheels before attempting to upload.
-        for wheel in dist/Brotli-*.whl; do
-          if [ -f "$wheel" ]; then
-            newname="${wheel/Brotli-/brotli-}"
-            mv "$wheel" "$newname"
-            echo "Renamed: $(basename "$wheel") -> $(basename "$newname")"
-          fi
-        done
 
     - uses: pypa/gh-action-pypi-publish@release/v1
       with:

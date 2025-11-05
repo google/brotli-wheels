@@ -1,0 +1,13 @@
+diff --git a/setup.py b/setup.py
+index d98a721..5c82320 100644
+--- a/setup.py
++++ b/setup.py
+@@ -140,7 +140,7 @@ class BuildExt(build_ext):
+         )
+ 
+ 
+-NAME = "Brotli"
++NAME = "brotli"
+ 
+ VERSION = get_version()
+ 
