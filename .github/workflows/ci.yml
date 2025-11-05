@@ -434,6 +434,8 @@ jobs:
     needs: [build_wheels, build_arch_wheels, build_wheels_py36_37, build_arch_wheels_py36_37, build_wheels_py27, build_wheels_py27_windows, build_sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
     steps:
     - uses: actions/download-artifact@v4
@@ -443,6 +445,4 @@ jobs:
 
     - uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_PASSWORD }}
         skip_existing: true
