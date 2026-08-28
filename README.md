@@ -5,7 +5,7 @@ This repository is used to build and publish brotli "[wheels](https://pythonwhee
 ![CI Status](https://github.com/google/brotli-wheels/actions/workflows/ci.yml/badge.svg)
 
 ## What are wheels?
-Wheels are the new standard of Python distribution and are intended to replace eggs. 
+Wheels are the new standard of Python distribution and are intended to replace eggs.
 
 ## Advantages of wheels
  - Faster installation for pure Python and native C extension packages.
@@ -37,10 +37,10 @@ git push
 ```
 
 This will automatically trigger GitHub Actions to build wheels for:
-- **Python versions**: 3.8, 3.9, 3.10, 3.11, 3.12, 3.13, 3.14
+- **Python versions**: 3.9, 3.10, 3.11, 3.12, 3.13, 3.14 (plus legacy 2.7 and 3.6-3.8 wheels)
 - **Linux**: x86_64, i686, aarch64, ppc64le (manylinux2014)
 - **macOS**: x86_64, ARM64 (universal2)
-- **Windows**: x64, x86
+- **Windows**: x64, x86, ARM64
 
 ### 3. Publish to PyPI (for releases)
 
