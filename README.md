@@ -37,7 +37,7 @@ git push
 ```
 
 This will automatically trigger GitHub Actions to build wheels for:
-- **Python versions**: 3.8, 3.9, 3.10, 3.11, 3.12, 3.13, 3.14
+- **Python versions**: 3.8, 3.9, 3.10, 3.11, 3.12, 3.13, 3.14, 3.14t (free-threaded)
 - **Linux**: x86_64, i686, aarch64, ppc64le (manylinux2014)
 - **macOS**: x86_64, ARM64 (universal2)
 - **Windows**: x64, x86
