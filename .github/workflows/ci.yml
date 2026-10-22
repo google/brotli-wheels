@@ -64,8 +64,7 @@ jobs:
         os: [macos-15-intel, windows-2025]
         arch: [auto64]
         build: ["cp{39,310,311,312,313,314,315}-*"]
-        # temporarily disable building wheels for PyPy until this gets fixed:
-        # https://github.com/google/brotli-wheels/issues/19
+        # PyPy builds use their own matrix below.
         # skip free-threaded Python builds until compatibility is verified
         skip: ["pp* cp*t-*"]
         include:
@@ -146,6 +145,52 @@ jobs:
       with:
         path: wheelhouse/*.whl
         name: wheels-${{ matrix.arch }}-${{ matrix.python }}
+
+  build_pypy_wheels:
+    name: PyPy 3.11/3.12 on ${{ matrix.os }} (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: aarch64
+          - os: macos-15-intel
+            arch: x86_64
+          - os: macos-15
+            arch: arm64
+          - os: windows-2025
+            arch: AMD64
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        submodules: true
+        persist-credentials: false
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      with:
+        python-version: "3.13"
+    - name: Patch setup.py to use normalized package name
+      run: git apply --directory="${PACKAGE_DIR}" normalize-package-name.patch
+    - name: Install dependencies
+      run: python -m pip install cibuildwheel==4.3.3
+    - name: Build Wheels
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
+      env:
+        CIBW_ENABLE: pypy
+        CIBW_BUILD: "pp{311,312}-*"
+        CIBW_ARCHS: ${{ matrix.arch }}
+        # PyPy 8 Linux binaries require glibc 2.28 or newer.
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+      with:
+        path: wheelhouse/*.whl
+        name: wheels-pypy-${{ matrix.os }}-${{ matrix.arch }}
 
   build_wheels_py36_38:
     name: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }} (py36-38)
@@ -461,7 +506,7 @@ jobs:
 
   deploy:
     name: Upload if release
-    needs: [build_wheels, build_arch_wheels, build_wheels_py36_38, build_arch_wheels_py36_38, build_wheels_py27, build_wheels_py27_windows, build_sdist]
+    needs: [build_wheels, build_arch_wheels, build_pypy_wheels, build_wheels_py36_38, build_arch_wheels_py36_38, build_wheels_py27, build_wheels_py27_windows, build_sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 

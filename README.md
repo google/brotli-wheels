@@ -42,10 +42,14 @@ This will automatically trigger GitHub Actions to build wheels for:
 - **macOS**: x86_64, ARM64 (universal2)
 - **Windows**: x64, x86
 
+The workflow also builds PyPy 3.11 and 3.12 wheels for Linux and macOS on x86_64 and ARM64, plus Windows x64.
+PyPy 3.12 is a beta release.
+The PyPy Linux wheels require glibc 2.28 or newer.
+
 The workflow pins cibuildwheel 4.3.3 for Python 3.9 through 3.15, 2.23.3 for Python 3.6 through 3.8, and 1.12.0 for Python 2.7.
 Python 2.7 Windows wheels use a separate MinGW build.
 Python 2.7 and Python 3.6/3.7 macOS wheels support Intel Macs only.
-PyPy and free-threaded Python wheels remain disabled for this release.
+Free-threaded Python wheels remain disabled for this release.
 
 ### 3. Publish to PyPI (for releases)
 
