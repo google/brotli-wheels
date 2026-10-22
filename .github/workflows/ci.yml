@@ -85,6 +85,11 @@ jobs:
             arch: auto32
             build: "cp{39,310,311,312,313,314,315}-*"
             skip: "pp* cp*t-*"
+
+          - os: windows-11-arm
+            arch: ARM64
+            build: "cp{39,310,311,312,313,314,315}-*"
+            skip: "cp*t-*"
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:

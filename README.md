@@ -40,7 +40,7 @@ This will automatically trigger GitHub Actions to build wheels for:
 - **Python versions**: 2.7 and 3.6 through 3.15
 - **Linux**: x86_64, i686, aarch64, ppc64le (manylinux and musllinux)
 - **macOS**: x86_64, ARM64 (universal2)
-- **Windows**: x64, x86
+- **Windows**: x64, x86, ARM64 (CPython 3.9 and newer)
 
 The workflow also builds PyPy 3.11 and 3.12 wheels for Linux and macOS on x86_64 and ARM64, plus Windows x64.
 PyPy 3.12 is a beta release.
