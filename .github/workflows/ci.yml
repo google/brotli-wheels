@@ -11,6 +11,9 @@ on:
     types:
       - published
 
+permissions:
+  contents: read
+
 env:
   PROJECT_NAME: brotli
   PACKAGE_DIR: src/brotli
@@ -25,11 +28,12 @@ jobs:
       run:
         working-directory: ${{ env.PACKAGE_DIR }}
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         submodules: true
+        persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
         python-version: "3.13"
     # PEP 625 requires normalized (lowercase) package names in wheel metadata.
@@ -42,7 +46,7 @@ jobs:
       run: python -m build --sdist
     - name: Check metadata
       run: twine check dist/*.tar.gz
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: ${{ env.PACKAGE_DIR }}/dist/*.tar.gz
         name: sdist
@@ -83,11 +87,12 @@ jobs:
             build: "cp{39,310,311,312,313,314,315}-*"
             skip: "pp* cp*t-*"
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         submodules: recursive
+        persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
         python-version: "3.13"
     - name: Patch setup.py to use normalized package name
@@ -102,7 +107,7 @@ jobs:
         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
         CIBW_ARCHS: ${{ matrix.arch }}
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
         name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.type }}
@@ -116,13 +121,14 @@ jobs:
         python: [39, 310, 311, 312, 313, 314, 315]
         arch: [aarch64, ppc64le]
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         submodules: true
-    - uses: actions/setup-python@v7
+        persist-credentials: false
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
         python-version: "3.13"
-    - uses: docker/setup-qemu-action@v4
+    - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
       with:
         platforms: all
     - name: Patch setup.py to use normalized package name
@@ -136,7 +142,7 @@ jobs:
         CIBW_ARCHS: ${{ matrix.arch }}
         CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
         CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux2014
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
         name: wheels-${{ matrix.arch }}-${{ matrix.python }}
@@ -181,11 +187,12 @@ jobs:
             build: "cp{36,37,38}-*"
             skip: "pp*"
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         submodules: recursive
+        persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
         python-version: "3.11"
     - name: Patch setup.py to use normalized package name
@@ -200,7 +207,7 @@ jobs:
         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
         CIBW_ARCHS: ${{ matrix.arch }}
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
         name: wheels-py36-38-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.type }}
@@ -213,13 +220,14 @@ jobs:
         python: [36, 37, 38]
         arch: [aarch64, ppc64le]
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         submodules: true
-    - uses: actions/setup-python@v7
+        persist-credentials: false
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
         python-version: "3.11"
-    - uses: docker/setup-qemu-action@v4
+    - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
       with:
         platforms: all
     - name: Patch setup.py to use normalized package name
@@ -233,7 +241,7 @@ jobs:
         CIBW_ARCHS: ${{ matrix.arch }}
         CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
         CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux2014
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
         name: wheels-py36-38-${{ matrix.arch }}-${{ matrix.python }}
@@ -264,12 +272,13 @@ jobs:
             CIBW_MANYLINUX_X86_64_IMAGE: ""
             CIBW_MANYLINUX_I686_IMAGE: ""
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         submodules: recursive
+        persist-credentials: false
 
     - name: Set up Python
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
         python-version: "3.11"
 
@@ -289,7 +298,7 @@ jobs:
         # Enable C99 for Python 2.7 (brotli requires it)
         CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
 
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
         name: wheels-py27-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.type }}
@@ -306,12 +315,13 @@ jobs:
           - arch: x86
             python_arch: x86
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         submodules: recursive
+        persist-credentials: false
 
     - name: Set up Python 3.x
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
         python-version: "3.11"
 
@@ -444,7 +454,7 @@ jobs:
         python -m pip install wheelhouse\*.whl
         python -m unittest discover -v -s ${{ env.PACKAGE_DIR }}\python\ -p "*_test.py"
 
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
         name: wheels-py27-windows-${{ matrix.arch }}
@@ -456,12 +466,12 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:
-    - uses: actions/download-artifact@v8
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
       with:
         path: dist
         merge-multiple: true
 
-    - uses: pypa/gh-action-pypi-publish@release/v1
+    - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_PASSWORD }}
