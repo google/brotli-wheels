@@ -17,8 +17,11 @@ permissions:
 env:
   PROJECT_NAME: brotli
   PACKAGE_DIR: src/brotli
-  CIBW_TEST_SOURCES: python/bro.py python/tests tests/testdata
-  CIBW_TEST_COMMAND: python -m unittest discover -v -s python/ -p "*_test.py
+  CIBW_TEST_SOURCES: >-
+    src/brotli/python/bro.py
+    src/brotli/python/tests
+    src/brotli/tests/testdata
+  CIBW_TEST_COMMAND: python -m unittest discover -v -s src/brotli/python -p "*_test.py"
 
 jobs:
 
@@ -300,6 +303,8 @@ jobs:
         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
         CIBW_ARCHS: ${{ matrix.arch }}
+        # This version of cibuildwheel doesn't support CIBW_TEST_SOURCES.
+        CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python -p "*_test.py"
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
@@ -334,6 +339,8 @@ jobs:
         CIBW_ARCHS: ${{ matrix.arch }}
         CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
         CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux2014
+        # This version of cibuildwheel doesn't support CIBW_TEST_SOURCES.
+        CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python -p "*_test.py"
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
@@ -390,6 +397,8 @@ jobs:
         CIBW_ARCHS: ${{ matrix.arch }}
         # Enable C99 for Python 2.7 (brotli requires it)
         CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
+        # This version of cibuildwheel doesn't support CIBW_TEST_SOURCES.
+        CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python -p "*_test.py"
 
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
