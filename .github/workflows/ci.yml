@@ -17,7 +17,11 @@ permissions:
 env:
   PROJECT_NAME: brotli
   PACKAGE_DIR: src/brotli
-  CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python/ -p "*_test.py"
+  CIBW_TEST_SOURCES: >-
+    src/brotli/python/bro.py
+    src/brotli/python/tests
+    src/brotli/tests/testdata
+  CIBW_TEST_COMMAND: python -m unittest discover -v -s src/brotli/python -p "*_test.py"
 
 jobs:
 
@@ -151,6 +155,48 @@ jobs:
         path: wheelhouse/*.whl
         name: wheels-${{ matrix.arch }}-${{ matrix.python }}
 
+  build_mobile_wheels:
+    name: ${{ matrix.arch }} on ${{ matrix.platform }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      matrix:
+        include:
+          - platform: android
+            arch: arm64_v8a
+            runs-on: ubuntu-24.04
+          - platform: android
+            arch: x86_64
+            runs-on: ubuntu-24.04
+          - platform: ios
+            arch: arm64_iphoneos
+            runs-on: macos-15
+          - platform: ios
+            arch: arm64_iphonesimulator
+            runs-on: macos-15
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        submodules: true
+        persist-credentials: false
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      with:
+        python-version: "3.13"
+    - name: Patch setup.py to use normalized package name
+      run: git apply --directory="${PACKAGE_DIR}" normalize-package-name.patch
+    - name: Patch bro_test.py to skip if subprocesses are not supported
+      run: git apply --directory="${PACKAGE_DIR}" bro-skip.patch
+    - name: Install dependencies
+      run: python -m pip install cibuildwheel==4.3.3
+    - name: Build Wheels
+      run: python -m cibuildwheel --output-dir wheelhouse "${PACKAGE_DIR}"
+      env:
+        CIBW_PLATFORM: ${{ matrix.platform }}
+        CIBW_ARCHS: ${{ matrix.arch }}
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+      with:
+        path: wheelhouse/*.whl
+        name: wheels-${{ matrix.platform }}-${{ matrix.arch }}
+
   build_pypy_wheels:
     name: PyPy 3.11/3.12 on ${{ matrix.os }} (${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
@@ -257,6 +303,8 @@ jobs:
         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.CIBW_MANYLINUX_I686_IMAGE }}
         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
         CIBW_ARCHS: ${{ matrix.arch }}
+        # This version of cibuildwheel doesn't support CIBW_TEST_SOURCES.
+        CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python -p "*_test.py"
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
@@ -291,6 +339,8 @@ jobs:
         CIBW_ARCHS: ${{ matrix.arch }}
         CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
         CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux2014
+        # This version of cibuildwheel doesn't support CIBW_TEST_SOURCES.
+        CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python -p "*_test.py"
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         path: wheelhouse/*.whl
@@ -347,6 +397,8 @@ jobs:
         CIBW_ARCHS: ${{ matrix.arch }}
         # Enable C99 for Python 2.7 (brotli requires it)
         CIBW_ENVIRONMENT: "CFLAGS='-std=c99'"
+        # This version of cibuildwheel doesn't support CIBW_TEST_SOURCES.
+        CIBW_TEST_COMMAND: python -m unittest discover -v -s {package}/python -p "*_test.py"
 
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:

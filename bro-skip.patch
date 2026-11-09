@@ -1,0 +1,22 @@
+diff --git a/python/tests/bro_test.py b/python/tests/bro_test.py
+index fa056ed..5242214 100644
+--- a/python/tests/bro_test.py
++++ b/python/tests/bro_test.py
+@@ -4,6 +4,7 @@
+ # See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
+ 
+ import subprocess
++import sys
+ import unittest
+ 
+ from . import _test_utils
+@@ -11,6 +12,9 @@ from . import _test_utils
+ BRO_ARGS = _test_utils.BRO_ARGS
+ TEST_ENV = _test_utils.TEST_ENV
+ 
++if sys.platform in ["android", "emscripten", "ios", "wasi"]:
++  raise unittest.SkipTest("subprocesses not supported on this platform")
++
+ 
+ def _get_original_name(test_data):
+   return test_data.split('.compressed')[0]
